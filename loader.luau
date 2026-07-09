@@ -2,11 +2,13 @@ local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
 local TextBox = Instance.new("TextBox")
+local FlingTargetBox = Instance.new("TextBox") -- Новое поле для ввода никнейма жертвы
 local SetSpeedBtn = Instance.new("TextButton")
 local ResetSpeedBtn = Instance.new("TextButton")
 local InfJumpBtn = Instance.new("TextButton")
 local NoclipBtn = Instance.new("TextButton")
 local FlyBtn = Instance.new("TextButton")
+local FlingBtn = Instance.new("TextButton")
 local UICorner = Instance.new("UICorner")
 local UICorner_2 = Instance.new("UICorner")
 local UICorner_3 = Instance.new("UICorner")
@@ -14,6 +16,8 @@ local UICorner_4 = Instance.new("UICorner")
 local UICorner_5 = Instance.new("UICorner")
 local UICorner_6 = Instance.new("UICorner")
 local UICorner_7 = Instance.new("UICorner")
+local UICorner_8 = Instance.new("UICorner")
+local UICorner_9 = Instance.new("UICorner") -- Для нового TextBox
 
 ScreenGui.Name = "Emil768TestScript_Gui"
 ScreenGui.Parent = game:GetService("CoreGui") or game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
@@ -22,8 +26,8 @@ ScreenGui.ResetOnSpawn = false
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-MainFrame.Position = UDim2.new(0.5, -125, 0.5, -165)
-MainFrame.Size = UDim2.new(0, 250, 0, 325)
+MainFrame.Position = UDim2.new(0.5, -125, 0.5, -205) -- Сдвинул чуть выше
+MainFrame.Size = UDim2.new(0, 250, 0, 410) -- Увеличил высоту до 410
 MainFrame.Active = true
 MainFrame.Draggable = true
 
@@ -39,77 +43,105 @@ Title.Text = "эмил768 тест скрипт"
 Title.TextColor3 = Color3.fromRGB(255, 215, 0)
 Title.TextSize = 18.000
 
+-- ПОЛЕ ВВОДА СКОРОСТИ
 TextBox.Parent = MainFrame
 TextBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-TextBox.Position = UDim2.new(0.08, 0, 0.13, 0)
-TextBox.Size = UDim2.new(0.84, 0, 0, 32)
+TextBox.Position = UDim2.new(0.08, 0, 0.10, 0)
+TextBox.Size = UDim2.new(0.84, 0, 0, 30)
 TextBox.Font = Enum.Font.SourceSans
 TextBox.PlaceholderText = "Введите скорость (напр. 50)"
 TextBox.Text = ""
 TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextBox.TextSize = 16.000
+TextBox.TextSize = 15.000
 
 UICorner_2.Parent = TextBox
 
 SetSpeedBtn.Name = "SetSpeedBtn"
 SetSpeedBtn.Parent = MainFrame
 SetSpeedBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-SetSpeedBtn.Position = UDim2.new(0.08, 0, 0.26, 0)
-SetSpeedBtn.Size = UDim2.new(0.84, 0, 0, 32)
+SetSpeedBtn.Position = UDim2.new(0.08, 0, 0.20, 0)
+SetSpeedBtn.Size = UDim2.new(0.84, 0, 0, 30)
 SetSpeedBtn.Font = Enum.Font.SourceSansBold
 SetSpeedBtn.Text = "ПРИМЕНИТЬ СКОРОСТЬ"
 SetSpeedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-SetSpeedBtn.TextSize = 14.000
+SetSpeedBtn.TextSize = 13.000
 
 UICorner_3.Parent = SetSpeedBtn
 
 ResetSpeedBtn.Name = "ResetSpeedBtn"
 ResetSpeedBtn.Parent = MainFrame
 ResetSpeedBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-ResetSpeedBtn.Position = UDim2.new(0.08, 0, 0.39, 0)
-ResetSpeedBtn.Size = UDim2.new(0.84, 0, 0, 32)
+ResetSpeedBtn.Position = UDim2.new(0.08, 0, 0.30, 0)
+ResetSpeedBtn.Size = UDim2.new(0.84, 0, 0, 30)
 ResetSpeedBtn.Font = Enum.Font.SourceSansBold
 ResetSpeedBtn.Text = "СБРОСИТЬ НА СТАНДАРТ"
 ResetSpeedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ResetSpeedBtn.TextSize = 13.000
+ResetSpeedBtn.TextSize = 12.000
 
 UICorner_4.Parent = ResetSpeedBtn
 
 InfJumpBtn.Name = "InfJumpBtn"
 InfJumpBtn.Parent = MainFrame
 InfJumpBtn.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
-InfJumpBtn.Position = UDim2.new(0.08, 0, 0.55, 0)
-InfJumpBtn.Size = UDim2.new(0.84, 0, 0, 32)
+InfJumpBtn.Position = UDim2.new(0.08, 0, 0.41, 0)
+InfJumpBtn.Size = UDim2.new(0.84, 0, 0, 30)
 InfJumpBtn.Font = Enum.Font.SourceSansBold
 InfJumpBtn.Text = "БЕСКОНЕЧНЫЙ ПРЫЖОК: ВЫКЛ"
 InfJumpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-InfJumpBtn.TextSize = 13.000
+InfJumpBtn.TextSize = 12.000
 
 UICorner_5.Parent = InfJumpBtn
 
 NoclipBtn.Name = "NoclipBtn"
 NoclipBtn.Parent = MainFrame
 NoclipBtn.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
-NoclipBtn.Position = UDim2.new(0.08, 0, 0.69, 0)
-NoclipBtn.Size = UDim2.new(0.84, 0, 0, 32)
+NoclipBtn.Position = UDim2.new(0.08, 0, 0.51, 0)
+NoclipBtn.Size = UDim2.new(0.84, 0, 0, 30)
 NoclipBtn.Font = Enum.Font.SourceSansBold
 NoclipBtn.Text = "NOCLIP (СКВОЗЬ СТЕНЫ): ВЫКЛ"
 NoclipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-NoclipBtn.TextSize = 12.000
+NoclipBtn.TextSize = 11.000
 
 UICorner_6.Parent = NoclipBtn
 
 FlyBtn.Name = "FlyBtn"
 FlyBtn.Parent = MainFrame
 FlyBtn.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
-FlyBtn.Position = UDim2.new(0.08, 0, 0.83, 0)
-FlyBtn.Size = UDim2.new(0.84, 0, 0, 32)
+FlyBtn.Position = UDim2.new(0.08, 0, 0.61, 0)
+FlyBtn.Size = UDim2.new(0.84, 0, 0, 30)
 FlyBtn.Font = Enum.Font.SourceSansBold
 FlyBtn.Text = "ПОЛЕТ (FLY): ВЫКЛ"
 FlyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-FlyBtn.TextSize = 13.000
+FlyBtn.TextSize = 12.000
 
 UICorner_7.Parent = FlyBtn
+
+-- ПОЛЕ ВВОДА НИКНЕЙМА ЖЕРТВЫ
+FlingTargetBox.Name = "FlingTargetBox"
+FlingTargetBox.Parent = MainFrame
+FlingTargetBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+FlingTargetBox.Position = UDim2.new(0.08, 0, 0.73, 0)
+FlingTargetBox.Size = UDim2.new(0.84, 0, 0, 30)
+FlingTargetBox.Font = Enum.Font.SourceSans
+FlingTargetBox.PlaceholderText = "Ник игрока (можно часть)"
+FlingTargetBox.Text = ""
+FlingTargetBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+FlingTargetBox.TextSize = 15.000
+
+UICorner_9.Parent = FlingTargetBox
+
+-- КНОПКА АКТИВАЦИИ ФЛИНГА
+FlingBtn.Name = "FlingBtn"
+FlingBtn.Parent = MainFrame
+FlingBtn.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
+FlingBtn.Position = UDim2.new(0.08, 0, 0.84, 0)
+FlingBtn.Size = UDim2.new(0.84, 0, 0, 32)
+FlingBtn.Font = Enum.Font.SourceSansBold
+FlingBtn.Text = "ФЛИНГ (FLING): ВЫКЛ"
+FlingBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FlingBtn.TextSize = 13.000
+
+UICorner_8.Parent = FlingBtn
 
 local targetSpeed = 16
 
@@ -196,8 +228,10 @@ NoclipBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+local flingEnabled = false
+
 game:GetService("RunService").Stepped:Connect(function()
-    if noclipEnabled then
+    if noclipEnabled or flingEnabled then
         local player = game.Players.LocalPlayer
         local character = player.Character
         if character then
@@ -283,11 +317,92 @@ FlyBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+-- УЛУЧШЕННАЯ ЛОГИКА ТАРГЕТ-ФЛИНГА
+local flingConnection = nil
+
+-- Функция поиска игрока по части никнейма
+local function GetPlayer(name)
+    name = name:lower()
+    for _, p in ipairs(game.Players:GetPlayers()) do
+        if p ~= game.Players.LocalPlayer and (p.Name:lower():sub(1, #name) == name or p.DisplayName:lower():sub(1, #name) == name) then
+            return p
+        end
+    end
+    return nil
+end
+
+FlingBtn.MouseButton1Click:Connect(function()
+    if not flingEnabled then
+        local targetPlayer = GetPlayer(FlingTargetBox.Text)
+        
+        if FlingTargetBox.Text == "" or not targetPlayer then
+            FlingBtn.Text = "ИГРОК НЕ НАЙДЕН!"
+            FlingBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+            task.wait(1.5)
+            FlingBtn.Text = "ФЛИНГ (FLING): ВЫКЛ"
+            FlingBtn.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
+            return
+        end
+
+        flingEnabled = true
+        FlingBtn.Text = "ФЛИНГ: " .. targetPlayer.Name:upper()
+        FlingBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 100)
+        
+        -- Цикл удержания флинга и автонаведения
+        flingConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            local lp = game.Players.LocalPlayer
+            if not flingEnabled or not lp.Character or not targetPlayer.Character then return end
+            
+            local myRoot = lp.Character:FindFirstChild("HumanoidRootPart")
+            local targetRoot = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+            local myHumanoid = lp.Character:FindFirstChildOfClass("Humanoid")
+            
+            if myRoot and targetRoot then
+                -- Включаем бешеное вращение
+                myRoot.RotVelocity = Vector3.new(0, 99999, 0)
+                -- Телепортируем прямо в торс жертвы с микро-сдвигом для импульса физики
+                myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 0.1)
+                
+                -- Симулируем ходьбу, чтобы Roblox обновлял позицию физики
+                if myHumanoid then
+                    myHumanoid:Move(Vector3.new(0, 0, 0.1))
+                end
+            end
+        end)
+    else
+        -- Выключение флинга
+        flingEnabled = false
+        FlingBtn.Text = "ФЛИНГ (FLING): ВЫКЛ"
+        FlingBtn.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
+        
+        if flingConnection then
+            flingConnection:Disconnect()
+            flingConnection = nil
+        end
+        
+        -- Возвращаем скорость вращения в норму
+        local lp = game.Players.LocalPlayer
+        if lp.Character then
+            local myRoot = lp.Character:FindFirstChild("HumanoidRootPart")
+            if myRoot then
+                myRoot.RotVelocity = Vector3.new(0, 0, 0)
+            end
+        end
+    end
+end)
+
+-- Автосброс при респавне
 game.Players.LocalPlayer.CharacterAdded:Connect(function()
     task.wait(0.5)
     if flyEnabled then
         stopFlying()
         flyEnabled = true
         startFlying()
+    end
+    if flingEnabled then
+        flingEnabled = false
+        FlingBtn.Text = "ФЛИНГ (FLING): ВЫКЛ"
+        FlingBtn.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
+        if flingConnection then flingConnection:Disconnect() end
     end
 end)
