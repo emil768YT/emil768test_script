@@ -20,7 +20,7 @@ MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
 MainFrame.Position = UDim2.new(0.5, -135, 0.5, -240)
-MainFrame.Size = UDim2.new(0, 270, 0, 560)
+MainFrame.Size = UDim2.new(0, 270, 0, 595) -- Немного увеличил высоту под новую кнопку
 MainFrame.ClipsDescendants = true
 MainFrame.Visible = true
 
@@ -87,8 +87,8 @@ local MainContainer = Instance.new("Frame")
 MainContainer.Name = "MainContainer"
 MainContainer.Parent = MainFrame
 MainContainer.BackgroundTransparency = 1
-MainContainer.Position = UDim2.new(0.05, 0, 0.16, 0)
-MainContainer.Size = UDim2.new(0.9, 0, 0.81, 0)
+MainContainer.Position = UDim2.new(0.05, 0, 0.15, 0)
+MainContainer.Size = UDim2.new(0.9, 0, 0.83, 0)
 MainContainer.Visible = true
 
 local MainLayout = Instance.new("UIListLayout")
@@ -100,8 +100,8 @@ local MM2Container = Instance.new("Frame")
 MM2Container.Name = "MM2Container"
 MM2Container.Parent = MainFrame
 MM2Container.BackgroundTransparency = 1
-MM2Container.Position = UDim2.new(0.05, 0, 0.16, 0)
-MM2Container.Size = UDim2.new(0.9, 0, 0.81, 0)
+MM2Container.Position = UDim2.new(0.05, 0, 0.15, 0)
+MM2Container.Size = UDim2.new(0.9, 0, 0.83, 0)
 MM2Container.Visible = false
 
 local MM2Layout = Instance.new("UIListLayout")
@@ -177,7 +177,7 @@ local function createVisualGroup(parent, height)
     corner.Parent = group
     
     local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(0, 160, 255) -- Красивый неоново-голубой
+    stroke.Color = Color3.fromRGB(0, 160, 255)
     stroke.Thickness = 1.5
     stroke.Parent = group
     
@@ -227,9 +227,11 @@ ResetSpeedBtn.Parent = SpeedGroup
 local InfJumpBtn = createButton("БЕСКОНЕЧНЫЙ ПРЫЖОК: ВЫКЛ", false)
 local NoclipBtn = createButton("СКВОЗЬ СТЕНЫ (NOCLIP): ВЫКЛ", false)
 local FlyBtn = createButton("ПОЛЕТ (FLY): ВЫКЛ", false)
+local ClimbBtn = createButton("ПОЛЗАТЬ ПО СТЕНАМ: ВЫКЛ", false) -- Наша новая кнопка
 InfJumpBtn.Parent = MainContainer
 NoclipBtn.Parent = MainContainer
 FlyBtn.Parent = MainContainer
+ClimbBtn.Parent = MainContainer
 
 -- 2. ГРУППА ТЕЛЕПОРТА К ИГРОКУ
 local TpGroup = createVisualGroup(MainContainer, 80)
@@ -259,7 +261,7 @@ FlingAllBtn.Parent = MainContainer
 local MM2EspBtn = createButton("ПОКАЗАТЬ РОЛИ (ESP): ВЫКЛ", false)
 MM2EspBtn.Parent = MM2Container
 
--- 4. ГРУППА КИЛЛ-АЛЛ И БИНДА КЛАВИШИ (ИЗ СКРИНШОТА)
+-- 4. ГРУППА КИЛЛ-АЛЛ И БИНДА КЛАВИШИ
 local KillBindGroup = createVisualGroup(MM2Container, 80)
 local KillAllBtn = createButton("KILL EVERYONE (УБИТЬ ВСЕХ)", true)
 local BindKillBox = createTextBox("Назначить клавишу (напр. E)")
@@ -318,7 +320,7 @@ local menuVisible = true
 UserInputService.InputBegan:Connect(function(input, gpe)
     if not gpe and input.KeyCode == Enum.KeyCode.RightShift then
         menuVisible = not menuVisible
-        local targetSize = menuVisible and UDim2.new(0, 270, 0, 560) or UDim2.new(0, 270, 0, 0)
+        local targetSize = menuVisible and UDim2.new(0, 270, 0, 595) or UDim2.new(0, 270, 0, 0)
         TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = targetSize}):Play()
     end
 end)
@@ -356,6 +358,7 @@ local noclipEnabled = false
 local flyEnabled = false
 local flingEnabled = false
 local flingAllEnabled = false
+local climbEnabled = false -- Переменная для паука
 
 RunService.Heartbeat:Connect(function()
     if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
@@ -401,6 +404,38 @@ RunService.Stepped:Connect(function()
             for _, part in ipairs(lp.Character:GetDescendants()) do
                 if part:IsA("BasePart") then part.CanCollide = false end
             end
+        end
+    end
+end)
+
+-- ЛОГИКА ПОЛЗАНИЯ ПО СТЕНАМ (WALL CLIMB / SPIDER-MAN)
+ClimbBtn.MouseButton1Click:Connect(function()
+    climbEnabled = not climbEnabled
+    ClimbBtn.Text = climbEnabled and "ПОЛЗАТЬ ПО СТЕНАМ: ВКЛ" or "ПОЛЗАТЬ ПО СТЕНАМ: ВЫКЛ"
+    TweenService:Create(ClimbBtn, TweenInfo.new(0.2), {TextColor3 = climbEnabled and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)}):Play()
+end)
+
+RunService.Heartbeat:Connect(function()
+    if not climbEnabled or not lp.Character or flyEnabled then return end
+    local root = lp.Character:FindFirstChild("HumanoidRootPart")
+    local humanoid = lp.Character:FindFirstChildOfClass("Humanoid")
+    if not root or not humanoid then return end
+
+    -- Пускаем луч вперед персонажа на 2.5 ступени, чтобы обнаружить стену
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterDescendantsInstances = {lp.Character}
+    raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+
+    local rayDirection = root.CFrame.LookVector * 2.5
+    local raycastResult = workspace:Raycast(root.Position, rayDirection, raycastParams)
+
+    if raycastResult then
+        -- Если нашли стену, удерживаем вертикальную скорость, имитируя карабканье при движении вперед
+        if humanoid.MoveDirection.Magnitude > 0 then
+            root.Velocity = Vector3.new(root.Velocity.X, targetSpeed * 0.8, root.Velocity.Z)
+        else
+            -- Удерживаем персонажа на стене (не даем сразу упасть)
+            root.Velocity = Vector3.new(root.Velocity.X, 0.1, root.Velocity.Z)
         end
     end
 end)
@@ -663,7 +698,6 @@ task.spawn(function()
         
         currentSheriff = foundSheriff
         
-        -- Автоподбор пистолета Шерифа
         if autoSheriffTpEnabled and currentSheriff and currentSheriff.Character then
             local hum = currentSheriff.Character:FindFirstChildOfClass("Humanoid")
             local root = currentSheriff.Character:FindFirstChild("HumanoidRootPart")
@@ -748,7 +782,6 @@ KillAllBtn.MouseButton1Click:Connect(function()
     KillAllBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 end)
 
--- ОБРАБОТКА ВВОДА КЛАВИШИ БИНДА КИЛЛ-АЛЛ
 BindKillBox.FocusLost:Connect(function(enterPressed)
     local text = BindKillBox.Text:upper():sub(1,1)
     if text ~= "" then
@@ -782,6 +815,7 @@ MM2EspBtn.MouseButton1Click:Connect(function()
     if not mm2EspEnabled then removeAllTags() end
 end)
 
+autoSheriffTpEnabled = false
 AutoSheriffTpBtn.MouseButton1Click:Connect(function()
     autoSheriffTpEnabled = not autoSheriffTpEnabled
     AutoSheriffTpBtn.Text = autoSheriffTpEnabled and "АВТОТЕЛЕПОРТ И СБОР ПИСТОЛЕТА: ВКЛ" or "АВТОТЕЛЕПОРТ И СБОР ПИСТОЛЕТА: ВЫКЛ"
@@ -793,4 +827,5 @@ lp.CharacterAdded:Connect(function()
     if flyEnabled then stopFlying() flyEnabled = true startFlying() end
     if flingEnabled then flingEnabled = false FlingBtn.Text = "ЗАПУСТИТЬ ФЛИНГ: ВЫКЛ" FlingBtn.TextColor3 = Color3.fromRGB(255, 255, 255) if flingConnection then flingConnection:Disconnect() end end
     flingAllEnabled = false
+    climbEnabled = false
 end)
