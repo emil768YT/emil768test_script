@@ -747,6 +747,8 @@ local mm2EspEnabled = false
 local autoSheriffTpEnabled = false
 local currentSheriff = nil
 
+-- ФУНКЦИИ ИСПРАВЛЕННОГО ESP:
+
 local function removeTagFromChar(char)
     if not char then return end
     local head = char:FindFirstChild("Head")
@@ -764,6 +766,7 @@ local function updateEspForPlayer(player, roleName, color)
     local head = char:FindFirstChild("Head")
     if not head then return end
 
+    -- Тег над головой
     local bGui = head:FindFirstChild("MM2_Tag")
     if not bGui then
         bGui = Instance.new("BillboardGui")
@@ -790,6 +793,7 @@ local function updateEspForPlayer(player, roleName, color)
         label.TextColor3 = color
     end
 
+    -- Подсветка персонажа (Highlight)
     local highlight = char:FindFirstChild("MM2_Highlight")
     if not highlight then
         highlight = Instance.new("Highlight")
@@ -799,6 +803,7 @@ local function updateEspForPlayer(player, roleName, color)
         highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
         highlight.Parent = char
     end
+    -- Принудительное обновление цвета при каждой проверке
     highlight.FillColor = color
     highlight.OutlineColor = color
 end
@@ -811,8 +816,27 @@ local function removeAllTags()
     end
 end
 
+-- Автоматическая очистка старых тегов при пересоздании персонажа
 Players.PlayerRemoving:Connect(function(p)
     if p.Character then removeTagFromChar(p.Character) end
+end)
+
+for _, p in ipairs(Players:GetPlayers()) do
+    p.CharacterAdded:Connect(function(newChar)
+        task.wait(0.2)
+        if not mm2EspEnabled then
+            removeTagFromChar(newChar)
+        end
+    end)
+end
+
+Players.PlayerAdded:Connect(function(p)
+    p.CharacterAdded:Connect(function(newChar)
+        task.wait(0.2)
+        if not mm2EspEnabled then
+            removeTagFromChar(newChar)
+        end
+    end)
 end)
 
 local function canCollectSheriffGun()
@@ -828,6 +852,7 @@ local function canCollectSheriffGun()
     return true
 end
 
+-- Основной цикл обновления ESP
 task.spawn(function()
     while true do
         task.wait(0.2)
@@ -857,6 +882,7 @@ task.spawn(function()
                     removeTagFromChar(p.Character)
                 end
             elseif p.Character then
+                -- Очищаем умерших персонажей
                 removeTagFromChar(p.Character)
             end
         end
