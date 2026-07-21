@@ -6,15 +6,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local lp = Players.LocalPlayer
 
--- СОЗДАНИЕ ИНТЕРФЕЙСА
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "Emil768_TestScriptGui"
 ScreenGui.Parent = game:GetService("CoreGui") or lp:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- ==========================================
--- ГЛАВНОЕ МЕНЮ
--- ==========================================
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
@@ -45,9 +41,6 @@ Title.TextColor3 = Color3.fromRGB(0, 215, 255)
 Title.TextSize = 13
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
--- ==========================================
--- СИСТЕМА ВКЛАДОК (TABS)
--- ==========================================
 local TabSystem = Instance.new("Frame")
 TabSystem.Name = "TabSystem"
 TabSystem.Parent = MainFrame
@@ -59,11 +52,11 @@ local MainTabBtn = Instance.new("TextButton")
 MainTabBtn.Name = "MainTabBtn"
 MainTabBtn.Parent = TabSystem
 MainTabBtn.BackgroundColor3 = Color3.fromRGB(38, 38, 48)
-MainTabBtn.Size = UDim2.new(0.48, 0, 1, 0)
+MainTabBtn.Size = UDim2.new(0.35, 0, 1, 0)
 MainTabBtn.Font = Enum.Font.GothamBold
 MainTabBtn.Text = "MAIN"
 MainTabBtn.TextColor3 = Color3.fromRGB(0, 215, 255)
-MainTabBtn.TextSize = 12
+MainTabBtn.TextSize = 11
 
 local MainTabCorner = Instance.new("UICorner")
 MainTabCorner.CornerRadius = UDim.new(0, 6)
@@ -73,18 +66,32 @@ local MM2TabBtn = Instance.new("TextButton")
 MM2TabBtn.Name = "MM2TabBtn"
 MM2TabBtn.Parent = TabSystem
 MM2TabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-MM2TabBtn.Position = UDim2.new(0.52, 0, 0, 0)
-MM2TabBtn.Size = UDim2.new(0.48, 0, 1, 0)
+MM2TabBtn.Position = UDim2.new(0.39, 0, 0, 0)
+MM2TabBtn.Size = UDim2.new(0.35, 0, 1, 0)
 MM2TabBtn.Font = Enum.Font.GothamBold
 MM2TabBtn.Text = "MM2"
 MM2TabBtn.TextColor3 = Color3.fromRGB(150, 150, 160)
-MM2TabBtn.TextSize = 12
+MM2TabBtn.TextSize = 11
 
 local MM2TabCorner = Instance.new("UICorner")
 MM2TabCorner.CornerRadius = UDim.new(0, 6)
 MM2TabCorner.Parent = MM2TabBtn
 
--- КОНТЕЙНЕРЫ ДЛЯ ХАКОВ (UIListLayout)
+local BindsTabBtn = Instance.new("TextButton")
+BindsTabBtn.Name = "BindsTabBtn"
+BindsTabBtn.Parent = TabSystem
+BindsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+BindsTabBtn.Position = UDim2.new(0.78, 0, 0, 0)
+BindsTabBtn.Size = UDim2.new(0.22, 0, 1, 0)
+BindsTabBtn.Font = Enum.Font.GothamBold
+BindsTabBtn.Text = "🔩"
+BindsTabBtn.TextColor3 = Color3.fromRGB(150, 150, 160)
+BindsTabBtn.TextSize = 12
+
+local BindsTabCorner = Instance.new("UICorner")
+BindsTabCorner.CornerRadius = UDim.new(0, 6)
+BindsTabCorner.Parent = BindsTabBtn
+
 local MainContainer = Instance.new("Frame")
 MainContainer.Name = "MainContainer"
 MainContainer.Parent = MainFrame
@@ -111,9 +118,32 @@ MM2Layout.Parent = MM2Container
 MM2Layout.SortOrder = Enum.SortOrder.LayoutOrder
 MM2Layout.Padding = UDim.new(0, 6)
 
+local BindsContainer = Instance.new("Frame")
+BindsContainer.Name = "BindsContainer"
+BindsContainer.Parent = MainFrame
+BindsContainer.BackgroundTransparency = 1
+BindsContainer.Position = UDim2.new(0.05, 0, 0, 80)
+BindsContainer.Size = UDim2.new(0.9, 0, 0, 500)
+BindsContainer.Visible = false
+
+local BindsLayout = Instance.new("UIListLayout")
+BindsLayout.Parent = BindsContainer
+BindsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+BindsLayout.Padding = UDim.new(0, 5)
+
+local BindsTitle = Instance.new("TextLabel")
+BindsTitle.Name = "BindsTitle"
+BindsTitle.Parent = BindsContainer
+BindsTitle.BackgroundTransparency = 1
+BindsTitle.Size = UDim2.new(1, 0, 0, 22)
+BindsTitle.Font = Enum.Font.GothamBold
+BindsTitle.Text = "🔩 BINDS"
+BindsTitle.TextColor3 = Color3.fromRGB(0, 215, 255)
+BindsTitle.TextSize = 12
+BindsTitle.TextXAlignment = Enum.TextXAlignment.Center
+
 local activeTab = "Main"
 
--- КНОПКА СВОРАЧИВАНИЯ / РАЗВОРАЧИВАНИЯ
 local MinimizeBtn = Instance.new("TextButton")
 MinimizeBtn.Name = "MinimizeBtn"
 MinimizeBtn.Parent = MainFrame
@@ -138,13 +168,12 @@ MinimizeBtn.MouseButton1Click:Connect(function()
         TabSystem.Visible = false
         MainContainer.Visible = false
         MM2Container.Visible = false
+        BindsContainer.Visible = false
     else
         TabSystem.Visible = true
-        if activeTab == "Main" then
-            MainContainer.Visible = true
-        else
-            MM2Container.Visible = true
-        end
+        MainContainer.Visible = (activeTab == "Main")
+        MM2Container.Visible = (activeTab == "MM2")
+        BindsContainer.Visible = (activeTab == "Binds")
     end
     
     TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = targetSize}):Play()
@@ -157,17 +186,16 @@ MinimizeBtn.MouseLeave:Connect(function()
     TweenService:Create(MinimizeBtn, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(150, 150, 170)}):Play()
 end)
 
--- Функция создания текстовых полей
 local function createTextBox(placeholder)
     local box = Instance.new("TextBox")
     box.BackgroundColor3 = Color3.fromRGB(34, 34, 44)
-    box.Size = UDim2.new(1, 0, 0, 32)
+    box.Size = UDim2.new(1, 0, 0, 30)
     box.Font = Enum.Font.Gotham
-    box.PlaceholderText = placeholder
-    box.PlaceholderColor3 = Color3.fromRGB(120, 120, 140)
+    box.PlaceholderText = placeholder or ""
+    box.PlaceholderColor3 = Color3.fromRGB(140, 140, 160)
     box.Text = ""
     box.TextColor3 = Color3.fromRGB(255, 255, 255)
-    box.TextSize = 13
+    box.TextSize = 11
     
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 6)
@@ -188,15 +216,14 @@ local function createTextBox(placeholder)
     return box
 end
 
--- Функция создания кнопок
 local function createButton(text, isActionBtn)
     local btn = Instance.new("TextButton")
     btn.BackgroundColor3 = isActionBtn and Color3.fromRGB(0, 130, 215) or Color3.fromRGB(38, 38, 48)
-    btn.Size = UDim2.new(1, 0, 0, 34)
+    btn.Size = UDim2.new(1, 0, 0, 32)
     btn.Font = Enum.Font.GothamBold
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 12
+    btn.TextSize = 11
     btn.AutoButtonColor = false
     
     local corner = Instance.new("UICorner")
@@ -213,7 +240,6 @@ local function createButton(text, isActionBtn)
     return btn
 end
 
--- Функция создания визуальных групп
 local function createVisualGroup(parent, height)
     local group = Instance.new("Frame")
     group.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
@@ -239,9 +265,39 @@ local function createVisualGroup(parent, height)
     local layout = Instance.new("UIListLayout")
     layout.Parent = group
     layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Padding = UDim.new(0, 6)
+    layout.Padding = UDim.new(0, 5)
     
     return group
+end
+
+local function createBindSettingRow(parent, labelText)
+    local row = Instance.new("Frame")
+    row.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
+    row.Size = UDim2.new(1, 0, 0, 32)
+    row.Parent = parent
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = row
+
+    local label = Instance.new("TextLabel")
+    label.BackgroundTransparency = 1
+    label.Position = UDim2.new(0, 8, 0, 0)
+    label.Size = UDim2.new(0.65, 0, 1, 0)
+    label.Font = Enum.Font.GothamBold
+    label.Text = labelText
+    label.TextColor3 = Color3.fromRGB(220, 220, 230)
+    label.TextSize = 11
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = row
+
+    local box = createTextBox("КЛАВИША")
+    box.Size = UDim2.new(0.28, 0, 0.8, 0)
+    box.Position = UDim2.new(0.7, 0, 0.1, 0)
+    box.TextSize = 11
+    box.Parent = row
+
+    return box
 end
 
 local function GetPlayer(name)
@@ -254,20 +310,16 @@ local function GetPlayer(name)
     return nil
 end
 
--- =======================================================
--- ЭЛЕМЕНТЫ ВКЛАДКИ MAIN
--- =======================================================
-local SpeedGroup = createVisualGroup(MainContainer, 114)
-local SpeedBox = createTextBox("Введите скорость")
+-- СЕКЦИЯ СКОРОСТИ
+local SpeedGroup = createVisualGroup(MainContainer, 110)
+local SpeedBox = createTextBox("ВВЕДИТЕ СКОРОСТЬ (НАПР. 50)")
 local SetSpeedBtn = createButton("ПРИМЕНИТЬ СКОРОСТЬ", true)
 local ResetSpeedBtn = createButton("СБРОСИТЬ СКОРОСТЬ", false)
-SpeedBox.Size = UDim2.new(1, 0, 0, 30)
-SetSpeedBtn.Size = UDim2.new(1, 0, 0, 32)
-ResetSpeedBtn.Size = UDim2.new(1, 0, 0, 32)
 SpeedBox.Parent = SpeedGroup
 SetSpeedBtn.Parent = SpeedGroup
 ResetSpeedBtn.Parent = SpeedGroup
 
+-- КНОПКИ ДВИЖЕНИЯ
 local InfJumpBtn = createButton("БЕСКОНЕЧНЫЙ ПРЫЖОК: ВЫКЛ", false)
 local NoclipBtn = createButton("СКВОЗЬ СТЕНЫ (NOCLIP): ВЫКЛ", false)
 local FlyBtn = createButton("ПОЛЕТ (FLY): ВЫКЛ", false)
@@ -277,53 +329,97 @@ NoclipBtn.Parent = MainContainer
 FlyBtn.Parent = MainContainer
 ClimbBtn.Parent = MainContainer
 
-local TpGroup = createVisualGroup(MainContainer, 80)
-local TpTargetBox = createTextBox("Ник игрока для телепорта")
+-- СЕКЦИЯ ТЕЛЕПОРТА
+local TpGroup = createVisualGroup(MainContainer, 75)
+local TpTargetBox = createTextBox("НИКНЕЙМ ИГРОКА ДЛЯ ТП")
 local TpBtn = createButton("ТЕЛЕПОРТИРОВАТЬСЯ", true)
-TpTargetBox.Size = UDim2.new(1, 0, 0, 30)
-TpBtn.Size = UDim2.new(1, 0, 0, 32)
 TpTargetBox.Parent = TpGroup
 TpBtn.Parent = TpGroup
 
-local FlingGroup = createVisualGroup(MainContainer, 80)
-local FlingTargetBox = createTextBox("Ник игрока для флинга")
+-- СЕКЦИЯ ФЛИНГА
+local FlingGroup = createVisualGroup(MainContainer, 75)
+local FlingTargetBox = createTextBox("НИКНЕЙМ ИГРОКА ДЛЯ ФЛИНГА")
 local FlingBtn = createButton("ЗАПУСТИТЬ ФЛИНГ: ВЫКЛ", false)
-FlingTargetBox.Size = UDim2.new(1, 0, 0, 30)
-FlingBtn.Size = UDim2.new(1, 0, 0, 32)
 FlingTargetBox.Parent = FlingGroup
 FlingBtn.Parent = FlingGroup
 
 local FlingAllBtn = createButton("FLING EVERYONE (ФЛИНГ ВСЕХ)", true)
 FlingAllBtn.Parent = MainContainer
 
--- =======================================================
--- ЭЛЕМЕНТЫ ВКЛАДКИ MM2
--- =======================================================
 local MM2EspBtn = createButton("ПОКАЗАТЬ РОЛИ (ESP): ВЫКЛ", false)
 MM2EspBtn.Parent = MM2Container
 
-local KillBindGroup = createVisualGroup(MM2Container, 80)
+local KillBindGroup = createVisualGroup(MM2Container, 44)
 local KillAllBtn = createButton("KILL EVERYONE (УБИТЬ ВСЕХ)", true)
-local BindKillBox = createTextBox("Назначить клавишу (напр. E)")
-KillAllBtn.Size = UDim2.new(1, 0, 0, 32)
-BindKillBox.Size = UDim2.new(1, 0, 0, 30)
 KillAllBtn.Parent = KillBindGroup
-BindKillBox.Parent = KillBindGroup
 
 local AutoSheriffTpBtn = createButton("АВТОТЕЛЕПОРТ И СБОР ПИСТОЛЕТА: ВЫКЛ", false)
 AutoSheriffTpBtn.Parent = MM2Container
 
--- ЛОГИКА ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК
+local FlyBindBox = createBindSettingRow(BindsContainer, "FLY (ПОЛЕТ)")
+local NoclipBindBox = createBindSettingRow(BindsContainer, "NOCLIP")
+local InfJumpBindBox = createBindSettingRow(BindsContainer, "INF JUMP")
+local FlingBindBox = createBindSettingRow(BindsContainer, "FLING")
+local FlingAllBindBox = createBindSettingRow(BindsContainer, "FLING ALL")
+local EspBindBox = createBindSettingRow(BindsContainer, "ESP MM2")
+local KillAllBindBox = createBindSettingRow(BindsContainer, "KILL ALL")
+local AutoSheriffBindBox = createBindSettingRow(BindsContainer, "AUTO SHERIFF")
+
+local keyBinds = {
+    Fly = nil,
+    Noclip = nil,
+    InfJump = nil,
+    Fling = nil,
+    FlingAll = nil,
+    Esp = nil,
+    KillAll = nil,
+    AutoSheriff = nil
+}
+
+local function setupKeyBindLogic(box, keyName)
+    box.FocusLost:Connect(function()
+        local text = box.Text:upper():sub(1, 1)
+        if text ~= "" then
+            local success, keyEnum = pcall(function() return Enum.KeyCode[text] end)
+            if success then
+                keyBinds[keyName] = keyEnum
+                box.Text = text
+                box.TextColor3 = Color3.fromRGB(0, 255, 150)
+            else
+                keyBinds[keyName] = nil
+                box.Text = ""
+                box.TextColor3 = Color3.fromRGB(255, 50, 50)
+            end
+        else
+            keyBinds[keyName] = nil
+            box.Text = ""
+            box.TextColor3 = Color3.fromRGB(255, 255, 255)
+        end
+    end)
+end
+
+setupKeyBindLogic(FlyBindBox, "Fly")
+setupKeyBindLogic(NoclipBindBox, "Noclip")
+setupKeyBindLogic(InfJumpBindBox, "InfJump")
+setupKeyBindLogic(FlingBindBox, "Fling")
+setupKeyBindLogic(FlingAllBindBox, "FlingAll")
+setupKeyBindLogic(EspBindBox, "Esp")
+setupKeyBindLogic(KillAllBindBox, "KillAll")
+setupKeyBindLogic(AutoSheriffBindBox, "AutoSheriff")
+
 MainTabBtn.MouseButton1Click:Connect(function()
     activeTab = "Main"
     if not isMinimized then
         MainContainer.Visible = true
         MM2Container.Visible = false
+        BindsContainer.Visible = false
     end
     MainTabBtn.BackgroundColor3 = Color3.fromRGB(38, 38, 48)
     MainTabBtn.TextColor3 = Color3.fromRGB(0, 215, 255)
     MM2TabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
     MM2TabBtn.TextColor3 = Color3.fromRGB(150, 150, 160)
+    BindsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+    BindsTabBtn.TextColor3 = Color3.fromRGB(150, 150, 160)
 end)
 
 MM2TabBtn.MouseButton1Click:Connect(function()
@@ -331,14 +427,31 @@ MM2TabBtn.MouseButton1Click:Connect(function()
     if not isMinimized then
         MainContainer.Visible = false
         MM2Container.Visible = true
+        BindsContainer.Visible = false
     end
     MM2TabBtn.BackgroundColor3 = Color3.fromRGB(38, 38, 48)
     MM2TabBtn.TextColor3 = Color3.fromRGB(0, 215, 255)
     MainTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
     MainTabBtn.TextColor3 = Color3.fromRGB(150, 150, 160)
+    BindsTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+    BindsTabBtn.TextColor3 = Color3.fromRGB(150, 150, 160)
 end)
 
--- ДРАГ-СИСТЕМА (ПЕРЕТАСКИВАНИЕ) [ЛКМ]
+BindsTabBtn.MouseButton1Click:Connect(function()
+    activeTab = "Binds"
+    if not isMinimized then
+        MainContainer.Visible = false
+        MM2Container.Visible = false
+        BindsContainer.Visible = true
+    end
+    BindsTabBtn.BackgroundColor3 = Color3.fromRGB(38, 38, 48)
+    BindsTabBtn.TextColor3 = Color3.fromRGB(0, 215, 255)
+    MainTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+    MainTabBtn.TextColor3 = Color3.fromRGB(150, 150, 160)
+    MM2TabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+    MM2TabBtn.TextColor3 = Color3.fromRGB(150, 150, 160)
+end)
+
 local dragging, dragInput, dragStart, startPos
 MainFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -360,7 +473,6 @@ UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
 end)
 
--- СКРЫТИЕ МЕНЮ НА RightShift
 local menuVisible = true
 UserInputService.InputBegan:Connect(function(input, gpe)
     if not gpe and input.KeyCode == Enum.KeyCode.RightShift then
@@ -370,9 +482,6 @@ UserInputService.InputBegan:Connect(function(input, gpe)
     end
 end)
 
--- ==========================================
--- ЛОГИКА ТЕЛЕПОРТАЦИИ
--- ==========================================
 TpBtn.MouseButton1Click:Connect(function()
     local target = GetPlayer(TpTargetBox.Text)
     if TpTargetBox.Text == "" or not target then
@@ -394,9 +503,6 @@ TpBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- ==========================================
--- ФУНКЦИОНАЛ ХАКОВ (MAIN)
--- ==========================================
 local targetSpeed = 16
 local infJumpEnabled = false
 local noclipEnabled = false
@@ -404,6 +510,48 @@ local flyEnabled = false
 local flingEnabled = false
 local flingAllEnabled = false
 local climbEnabled = false
+
+local function toggleInfJump()
+    infJumpEnabled = not infJumpEnabled
+    InfJumpBtn.Text = infJumpEnabled and "БЕСКОНЕЧНЫЙ ПРЫЖОК: ВКЛ" or "БЕСКОНЕЧНЫЙ ПРЫЖОК: ВЫКЛ"
+    TweenService:Create(InfJumpBtn, TweenInfo.new(0.2), {TextColor3 = infJumpEnabled and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)}):Play()
+end
+
+local function toggleNoclip()
+    noclipEnabled = not noclipEnabled
+    NoclipBtn.Text = noclipEnabled and "СКВОЗЬ СТЕНЫ (NOCLIP): ВКЛ" or "СКВОЗЬ СТЕНЫ (NOCLIP): ВЫКЛ"
+    TweenService:Create(NoclipBtn, TweenInfo.new(0.2), {TextColor3 = noclipEnabled and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)}):Play()
+end
+
+local bodyVelocity, bodyGyro
+local function stopFlying() flyEnabled = false if bodyVelocity then bodyVelocity:Destroy() end if bodyGyro then bodyGyro:Destroy() end end
+local function startFlying()
+    if not lp.Character or not lp.Character:FindFirstChild("HumanoidRootPart") then return end
+    local root = lp.Character.HumanoidRootPart
+    bodyVelocity = Instance.new("BodyVelocity") bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge) bodyVelocity.Parent = root
+    bodyGyro = Instance.new("BodyGyro") bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge) bodyGyro.P = 3000 bodyGyro.Parent = root
+    task.spawn(function()
+        local cam = workspace.CurrentCamera
+        while flyEnabled and root and root.Parent do
+            local dir = Vector3.new(0, 0, 0)
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then dir = dir + cam.CFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then dir = dir - cam.CFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then dir = dir - cam.CFrame.RightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then dir = dir + cam.CFrame.RightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0, 1, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then dir = dir - Vector3.new(0, 1, 0) end
+            bodyVelocity.Velocity = dir.Magnitude > 0 and dir.Unit * targetSpeed or Vector3.new(0, 0, 0)
+            bodyGyro.CFrame = cam.CFrame task.wait()
+        end
+    end)
+end
+
+local function toggleFly()
+    flyEnabled = not flyEnabled
+    FlyBtn.Text = flyEnabled and "ПОЛЕТ (FLY): ВКЛ" or "ПОЛЕТ (FLY): ВЫКЛ"
+    TweenService:Create(FlyBtn, TweenInfo.new(0.2), {TextColor3 = flyEnabled and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)}):Play()
+    if flyEnabled then startFlying() else stopFlying() end
+end
 
 RunService.Heartbeat:Connect(function()
     if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
@@ -425,22 +573,14 @@ end)
 
 ResetSpeedBtn.MouseButton1Click:Connect(function() targetSpeed = 16 SpeedBox.Text = "" end)
 
-InfJumpBtn.MouseButton1Click:Connect(function()
-    infJumpEnabled = not infJumpEnabled
-    InfJumpBtn.Text = infJumpEnabled and "БЕСКОНЕЧНЫЙ ПРЫЖОК: ВКЛ" or "БЕСКОНЕЧНЫЙ ПРЫЖОК: ВЫКЛ"
-    TweenService:Create(InfJumpBtn, TweenInfo.new(0.2), {TextColor3 = infJumpEnabled and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)}):Play()
-end)
+InfJumpBtn.MouseButton1Click:Connect(toggleInfJump)
+NoclipBtn.MouseButton1Click:Connect(toggleNoclip)
+FlyBtn.MouseButton1Click:Connect(toggleFly)
 
 UserInputService.JumpRequest:Connect(function()
     if infJumpEnabled and lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
         lp.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
     end
-end)
-
-NoclipBtn.MouseButton1Click:Connect(function()
-    noclipEnabled = not noclipEnabled
-    NoclipBtn.Text = noclipEnabled and "СКВОЗЬ СТЕНЫ (NOCLIP): ВКЛ" or "СКВОЗЬ СТЕНЫ (NOCLIP): ВЫКЛ"
-    TweenService:Create(NoclipBtn, TweenInfo.new(0.2), {TextColor3 = noclipEnabled and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)}):Play()
 end)
 
 RunService.Stepped:Connect(function()
@@ -481,36 +621,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
-local bodyVelocity, bodyGyro
-local function stopFlying() flyEnabled = false if bodyVelocity then bodyVelocity:Destroy() end if bodyGyro then bodyGyro:Destroy() end end
-local function startFlying()
-    if not lp.Character or not lp.Character:FindFirstChild("HumanoidRootPart") then return end
-    local root = lp.Character.HumanoidRootPart
-    bodyVelocity = Instance.new("BodyVelocity") bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge) bodyVelocity.Parent = root
-    bodyGyro = Instance.new("BodyGyro") bodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge) bodyGyro.P = 3000 bodyGyro.Parent = root
-    task.spawn(function()
-        local cam = workspace.CurrentCamera
-        while flyEnabled and root and root.Parent do
-            local dir = Vector3.new(0, 0, 0)
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then dir = dir + cam.CFrame.LookVector end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then dir = dir - cam.CFrame.LookVector end
-            if UserInputService:IsKeyDown(Enum.KeyCode.A) then dir = dir - cam.CFrame.RightVector end
-            if UserInputService:IsKeyDown(Enum.KeyCode.D) then dir = dir + cam.CFrame.RightVector end
-            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0, 1, 0) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then dir = dir - Vector3.new(0, 1, 0) end
-            bodyVelocity.Velocity = dir.Magnitude > 0 and dir.Unit * targetSpeed or Vector3.new(0, 0, 0)
-            bodyGyro.CFrame = cam.CFrame task.wait()
-        end
-    end)
-end
-
-FlyBtn.MouseButton1Click:Connect(function()
-    flyEnabled = not flyEnabled
-    FlyBtn.Text = flyEnabled and "ПОЛЕТ (FLY): ВКЛ" or "ПОЛЕТ (FLY): ВЫКЛ"
-    TweenService:Create(FlyBtn, TweenInfo.new(0.2), {TextColor3 = flyEnabled and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)}):Play()
-    if flyEnabled then startFlying() else stopFlying() end
-end)
-
+local flingConnection, savedCFrame
 local function disableFlingAndReturn()
     flingEnabled = false 
     FlingBtn.Text = "ЗАПУСТИТЬ ФЛИНГ: ВЫКЛ" 
@@ -527,11 +638,7 @@ local function disableFlingAndReturn()
     end
 end
 
--- ==========================================
--- ОДИНОЧНЫЙ ФЛИНГ
--- ==========================================
-local flingConnection, savedCFrame
-FlingBtn.MouseButton1Click:Connect(function()
+local function toggleFling()
     if flingAllEnabled then return end
     if not flingEnabled then
         local target = GetPlayer(FlingTargetBox.Text)
@@ -575,12 +682,11 @@ FlingBtn.MouseButton1Click:Connect(function()
     else
         disableFlingAndReturn()
     end
-end)
+end
 
--- ==========================================
--- МАССОВЫЙ ФЛИНГ
--- ==========================================
-FlingAllBtn.MouseButton1Click:Connect(function()
+FlingBtn.MouseButton1Click:Connect(toggleFling)
+
+local function toggleFlingAll()
     if flingEnabled or flingAllEnabled then return end
     if not lp.Character or not lp.Character:FindFirstChild("HumanoidRootPart") then return end
     
@@ -633,67 +739,81 @@ FlingAllBtn.MouseButton1Click:Connect(function()
         FlingAllBtn.Text = "FLING EVERYONE (ФЛИНГ ВСЕХ)"
         FlingAllBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     end)
-end)
+end
 
--- ==========================================
--- ЛОГИКА MM2 (ESP, KILL ALL, SMART SHERIFF)
--- ==========================================
+FlingAllBtn.MouseButton1Click:Connect(toggleFlingAll)
+
 local mm2EspEnabled = false
 local autoSheriffTpEnabled = false
-local currentKillKey = nil
 local currentSheriff = nil
 
-local function createEspTag(player, roleName, color)
-    if not player.Character then return end
-    local char = player.Character
+local function removeTagFromChar(char)
+    if not char then return end
     local head = char:FindFirstChild("Head")
-    
-    if head then
-        if head:FindFirstChild("MM2_Tag") then head.MM2_Tag:Destroy() end
-        
-        local bGui = Instance.new("BillboardGui")
+    if head and head:FindFirstChild("MM2_Tag") then
+        head.MM2_Tag:Destroy()
+    end
+    if char:FindFirstChild("MM2_Highlight") then
+        char.MM2_Highlight:Destroy()
+    end
+end
+
+local function updateEspForPlayer(player, roleName, color)
+    local char = player.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local head = char:FindFirstChild("Head")
+    if not head then return end
+
+    local bGui = head:FindFirstChild("MM2_Tag")
+    if not bGui then
+        bGui = Instance.new("BillboardGui")
         bGui.Name = "MM2_Tag"
         bGui.Size = UDim2.new(0, 180, 0, 35)
         bGui.AlwaysOnTop = true
         bGui.ExtentsOffset = Vector3.new(0, 3, 0)
         bGui.Parent = head
-        
+
         local label = Instance.new("TextLabel")
+        label.Name = "RoleLabel"
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
         label.Font = Enum.Font.GothamBold
-        label.Text = player.DisplayName .. " [" .. roleName .. "]"
-        label.TextColor3 = color
         label.TextSize = 13
         label.TextStrokeTransparency = 0.5
         label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
         label.Parent = bGui
     end
-    
-    if char:FindFirstChild("MM2_Highlight") then char.MM2_Highlight:Destroy() end
-    
-    local highlight = Instance.new("Highlight")
-    highlight.Name = "MM2_Highlight"
+
+    local label = bGui:FindFirstChild("RoleLabel")
+    if label then
+        label.Text = player.DisplayName .. " [" .. roleName .. "]"
+        label.TextColor3 = color
+    end
+
+    local highlight = char:FindFirstChild("MM2_Highlight")
+    if not highlight then
+        highlight = Instance.new("Highlight")
+        highlight.Name = "MM2_Highlight"
+        highlight.FillTransparency = 0.5
+        highlight.OutlineTransparency = 0
+        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        highlight.Parent = char
+    end
     highlight.FillColor = color
-    highlight.FillTransparency = 0.5
     highlight.OutlineColor = color
-    highlight.OutlineTransparency = 0
-    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-    highlight.Parent = char
 end
 
 local function removeAllTags()
     for _, p in ipairs(Players:GetPlayers()) do
         if p.Character then
-            if p.Character:FindFirstChild("Head") and p.Character.Head:FindFirstChild("MM2_Tag") then
-                p.Character.Head.MM2_Tag:Destroy()
-            end
-            if p.Character:FindFirstChild("MM2_Highlight") then
-                p.Character.MM2_Highlight:Destroy()
-            end
+            removeTagFromChar(p.Character)
         end
     end
 end
+
+Players.PlayerRemoving:Connect(function(p)
+    if p.Character then removeTagFromChar(p.Character) end
+end)
 
 local function canCollectSheriffGun()
     local hasKnife = lp.Backpack:FindFirstChild("Knife") or (lp.Character and lp.Character:FindFirstChild("Knife"))
@@ -710,12 +830,12 @@ end
 
 task.spawn(function()
     while true do
-        task.wait(0.1)
+        task.wait(0.2)
         
         local foundSheriff = nil
         
         for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= lp and p.Character then
+            if p ~= lp and p.Character and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
                 local role = "Innocent"
                 local color = Color3.fromRGB(0, 255, 100)
                 
@@ -732,8 +852,12 @@ task.spawn(function()
                 end
                 
                 if mm2EspEnabled then
-                    createEspTag(p, role, color)
+                    updateEspForPlayer(p, role, color)
+                else
+                    removeTagFromChar(p.Character)
                 end
+            elseif p.Character then
+                removeTagFromChar(p.Character)
             end
         end
         
@@ -823,44 +947,33 @@ KillAllBtn.MouseButton1Click:Connect(function()
     KillAllBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 end)
 
-BindKillBox.FocusLost:Connect(function(enterPressed)
-    local text = BindKillBox.Text:upper():sub(1,1)
-    if text ~= "" then
-        local success, keyEnum = pcall(function() return Enum.KeyCode[text] end)
-        if success then 
-            currentKillKey = keyEnum 
-            BindKillBox.Text = "БИНД: " .. text
-            BindKillBox.TextColor3 = Color3.fromRGB(0, 255, 150)
-        else 
-            currentKillKey = nil 
-            BindKillBox.Text = "НЕВЕРНАЯ КЛАВИША!" 
-            BindKillBox.TextColor3 = Color3.fromRGB(255, 50, 50)
-        end
-    else 
-        currentKillKey = nil 
-        BindKillBox.Text = "Назначить клавишу (напр. E)" 
-        BindKillBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    end
-end)
-
-UserInputService.InputBegan:Connect(function(input, gpe)
-    if not gpe and currentKillKey and input.KeyCode == currentKillKey then 
-        killEveryone() 
-    end
-end)
-
-MM2EspBtn.MouseButton1Click:Connect(function()
+local function toggleEsp()
     mm2EspEnabled = not mm2EspEnabled
     MM2EspBtn.Text = mm2EspEnabled and "ПОКАЗАТЬ РОЛИ (ESP): ВКЛ" or "ПОКАЗАТЬ РОЛИ (ESP): ВЫКЛ"
     TweenService:Create(MM2EspBtn, TweenInfo.new(0.2), {TextColor3 = mm2EspEnabled and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)}):Play()
     if not mm2EspEnabled then removeAllTags() end
-end)
+end
 
-autoSheriffTpEnabled = false
-AutoSheriffTpBtn.MouseButton1Click:Connect(function()
+local function toggleAutoSheriff()
     autoSheriffTpEnabled = not autoSheriffTpEnabled
     AutoSheriffTpBtn.Text = autoSheriffTpEnabled and "АВТОТЕЛЕПОРТ И СБОР ПИСТОЛЕТА: ВКЛ" or "АВТОТЕЛЕПОРТ И СБОР ПИСТОЛЕТА: ВЫКЛ"
     TweenService:Create(AutoSheriffTpBtn, TweenInfo.new(0.2), {TextColor3 = autoSheriffTpEnabled and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)}):Play()
+end
+
+MM2EspBtn.MouseButton1Click:Connect(toggleEsp)
+AutoSheriffTpBtn.MouseButton1Click:Connect(toggleAutoSheriff)
+
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    local k = input.KeyCode
+    if k == keyBinds.Fly then toggleFly() end
+    if k == keyBinds.Noclip then toggleNoclip() end
+    if k == keyBinds.InfJump then toggleInfJump() end
+    if k == keyBinds.Fling then toggleFling() end
+    if k == keyBinds.FlingAll then toggleFlingAll() end
+    if k == keyBinds.Esp then toggleEsp() end
+    if k == keyBinds.KillAll then killEveryone() end
+    if k == keyBinds.AutoSheriff then toggleAutoSheriff() end
 end)
 
 lp.CharacterAdded:Connect(function()
