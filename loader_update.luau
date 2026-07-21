@@ -20,7 +20,7 @@ MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
 MainFrame.Position = UDim2.new(0.5, -135, 0.5, -240)
-MainFrame.Size = UDim2.new(0, 270, 0, 595) -- Немного увеличил высоту под новую кнопку
+MainFrame.Size = UDim2.new(0, 270, 0, 595)
 MainFrame.ClipsDescendants = true
 MainFrame.Visible = true
 
@@ -37,11 +37,13 @@ local Title = Instance.new("TextLabel")
 Title.Name = "Title"
 Title.Parent = MainFrame
 Title.BackgroundTransparency = 1
-Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Position = UDim2.new(0, 12, 0, 0)
+Title.Size = UDim2.new(1, -50, 0, 40)
 Title.Font = Enum.Font.GothamBold
 Title.Text = "EMIL768 TEST SCRIPT"
 Title.TextColor3 = Color3.fromRGB(0, 215, 255)
 Title.TextSize = 13
+Title.TextXAlignment = Enum.TextXAlignment.Left
 
 -- ==========================================
 -- СИСТЕМА ВКЛАДОК (TABS)
@@ -50,7 +52,7 @@ local TabSystem = Instance.new("Frame")
 TabSystem.Name = "TabSystem"
 TabSystem.Parent = MainFrame
 TabSystem.BackgroundTransparency = 1
-TabSystem.Position = UDim2.new(0.05, 0, 0.08, 0)
+TabSystem.Position = UDim2.new(0.05, 0, 0, 42)
 TabSystem.Size = UDim2.new(0.9, 0, 0, 30)
 
 local MainTabBtn = Instance.new("TextButton")
@@ -82,13 +84,13 @@ local MM2TabCorner = Instance.new("UICorner")
 MM2TabCorner.CornerRadius = UDim.new(0, 6)
 MM2TabCorner.Parent = MM2TabBtn
 
--- КОНТЕЙНЕРЫ ДЛЯ ХАКОВ С КРУТИЛКОЙ (UIListLayout)
+-- КОНТЕЙНЕРЫ ДЛЯ ХАКОВ (UIListLayout)
 local MainContainer = Instance.new("Frame")
 MainContainer.Name = "MainContainer"
 MainContainer.Parent = MainFrame
 MainContainer.BackgroundTransparency = 1
-MainContainer.Position = UDim2.new(0.05, 0, 0.15, 0)
-MainContainer.Size = UDim2.new(0.9, 0, 0.83, 0)
+MainContainer.Position = UDim2.new(0.05, 0, 0, 80)
+MainContainer.Size = UDim2.new(0.9, 0, 0, 500)
 MainContainer.Visible = true
 
 local MainLayout = Instance.new("UIListLayout")
@@ -100,14 +102,60 @@ local MM2Container = Instance.new("Frame")
 MM2Container.Name = "MM2Container"
 MM2Container.Parent = MainFrame
 MM2Container.BackgroundTransparency = 1
-MM2Container.Position = UDim2.new(0.05, 0, 0.15, 0)
-MM2Container.Size = UDim2.new(0.9, 0, 0.83, 0)
+MM2Container.Position = UDim2.new(0.05, 0, 0, 80)
+MM2Container.Size = UDim2.new(0.9, 0, 0, 500)
 MM2Container.Visible = false
 
 local MM2Layout = Instance.new("UIListLayout")
 MM2Layout.Parent = MM2Container
 MM2Layout.SortOrder = Enum.SortOrder.LayoutOrder
 MM2Layout.Padding = UDim.new(0, 6)
+
+local activeTab = "Main"
+
+-- КНОПКА СВОРАЧИВАНИЯ / РАЗВОРАЧИВАНИЯ
+local MinimizeBtn = Instance.new("TextButton")
+MinimizeBtn.Name = "MinimizeBtn"
+MinimizeBtn.Parent = MainFrame
+MinimizeBtn.BackgroundTransparency = 1
+MinimizeBtn.Position = UDim2.new(1, -35, 0, 5)
+MinimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+MinimizeBtn.Font = Enum.Font.GothamBold
+MinimizeBtn.Text = "—"
+MinimizeBtn.TextColor3 = Color3.fromRGB(150, 150, 170)
+MinimizeBtn.TextSize = 14
+
+local isMinimized = false
+local normalSize = UDim2.new(0, 270, 0, 595)
+local minimizedSize = UDim2.new(0, 270, 0, 40)
+
+MinimizeBtn.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    local targetSize = isMinimized and minimizedSize or normalSize
+    MinimizeBtn.Text = isMinimized and "+" or "—"
+    
+    if isMinimized then
+        TabSystem.Visible = false
+        MainContainer.Visible = false
+        MM2Container.Visible = false
+    else
+        TabSystem.Visible = true
+        if activeTab == "Main" then
+            MainContainer.Visible = true
+        else
+            MM2Container.Visible = true
+        end
+    end
+    
+    TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = targetSize}):Play()
+end)
+
+MinimizeBtn.MouseEnter:Connect(function()
+    TweenService:Create(MinimizeBtn, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(0, 215, 255)}):Play()
+end)
+MinimizeBtn.MouseLeave:Connect(function()
+    TweenService:Create(MinimizeBtn, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(150, 150, 170)}):Play()
+end)
 
 -- Функция создания текстовых полей
 local function createTextBox(placeholder)
@@ -165,7 +213,7 @@ local function createButton(text, isActionBtn)
     return btn
 end
 
--- Функция для создания красивого контейнера с обводкой
+-- Функция создания визуальных групп
 local function createVisualGroup(parent, height)
     local group = Instance.new("Frame")
     group.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
@@ -196,7 +244,6 @@ local function createVisualGroup(parent, height)
     return group
 end
 
--- Вспомогательная функция поиска игрока
 local function GetPlayer(name)
     name = name:lower()
     for _, p in ipairs(Players:GetPlayers()) do
@@ -210,8 +257,6 @@ end
 -- =======================================================
 -- ЭЛЕМЕНТЫ ВКЛАДКИ MAIN
 -- =======================================================
-
--- 1. ГРУППА НАСТРОЙКИ СКОРОСТИ
 local SpeedGroup = createVisualGroup(MainContainer, 114)
 local SpeedBox = createTextBox("Введите скорость")
 local SetSpeedBtn = createButton("ПРИМЕНИТЬ СКОРОСТЬ", true)
@@ -223,17 +268,15 @@ SpeedBox.Parent = SpeedGroup
 SetSpeedBtn.Parent = SpeedGroup
 ResetSpeedBtn.Parent = SpeedGroup
 
--- Обычные кнопки без биндов/полей ввода
 local InfJumpBtn = createButton("БЕСКОНЕЧНЫЙ ПРЫЖОК: ВЫКЛ", false)
 local NoclipBtn = createButton("СКВОЗЬ СТЕНЫ (NOCLIP): ВЫКЛ", false)
 local FlyBtn = createButton("ПОЛЕТ (FLY): ВЫКЛ", false)
-local ClimbBtn = createButton("ПОЛЗАТЬ ПО СТЕНАМ: ВЫКЛ", false) -- Наша новая кнопка
+local ClimbBtn = createButton("ПОЛЗАТЬ ПО СТЕНАМ: ВЫКЛ", false)
 InfJumpBtn.Parent = MainContainer
 NoclipBtn.Parent = MainContainer
 FlyBtn.Parent = MainContainer
 ClimbBtn.Parent = MainContainer
 
--- 2. ГРУППА ТЕЛЕПОРТА К ИГРОКУ
 local TpGroup = createVisualGroup(MainContainer, 80)
 local TpTargetBox = createTextBox("Ник игрока для телепорта")
 local TpBtn = createButton("ТЕЛЕПОРТИРОВАТЬСЯ", true)
@@ -242,7 +285,6 @@ TpBtn.Size = UDim2.new(1, 0, 0, 32)
 TpTargetBox.Parent = TpGroup
 TpBtn.Parent = TpGroup
 
--- 3. ГРУППА ОДИНОЧНОГО ФЛИНГА
 local FlingGroup = createVisualGroup(MainContainer, 80)
 local FlingTargetBox = createTextBox("Ник игрока для флинга")
 local FlingBtn = createButton("ЗАПУСТИТЬ ФЛИНГ: ВЫКЛ", false)
@@ -254,14 +296,12 @@ FlingBtn.Parent = FlingGroup
 local FlingAllBtn = createButton("FLING EVERYONE (ФЛИНГ ВСЕХ)", true)
 FlingAllBtn.Parent = MainContainer
 
-
 -- =======================================================
 -- ЭЛЕМЕНТЫ ВКЛАДКИ MM2
 -- =======================================================
 local MM2EspBtn = createButton("ПОКАЗАТЬ РОЛИ (ESP): ВЫКЛ", false)
 MM2EspBtn.Parent = MM2Container
 
--- 4. ГРУППА КИЛЛ-АЛЛ И БИНДА КЛАВИШИ
 local KillBindGroup = createVisualGroup(MM2Container, 80)
 local KillAllBtn = createButton("KILL EVERYONE (УБИТЬ ВСЕХ)", true)
 local BindKillBox = createTextBox("Назначить клавишу (напр. E)")
@@ -273,11 +313,13 @@ BindKillBox.Parent = KillBindGroup
 local AutoSheriffTpBtn = createButton("АВТОТЕЛЕПОРТ И СБОР ПИСТОЛЕТА: ВЫКЛ", false)
 AutoSheriffTpBtn.Parent = MM2Container
 
-
 -- ЛОГИКА ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК
 MainTabBtn.MouseButton1Click:Connect(function()
-    MainContainer.Visible = true
-    MM2Container.Visible = false
+    activeTab = "Main"
+    if not isMinimized then
+        MainContainer.Visible = true
+        MM2Container.Visible = false
+    end
     MainTabBtn.BackgroundColor3 = Color3.fromRGB(38, 38, 48)
     MainTabBtn.TextColor3 = Color3.fromRGB(0, 215, 255)
     MM2TabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
@@ -285,8 +327,11 @@ MainTabBtn.MouseButton1Click:Connect(function()
 end)
 
 MM2TabBtn.MouseButton1Click:Connect(function()
-    MainContainer.Visible = false
-    MM2Container.Visible = true
+    activeTab = "MM2"
+    if not isMinimized then
+        MainContainer.Visible = false
+        MM2Container.Visible = true
+    end
     MM2TabBtn.BackgroundColor3 = Color3.fromRGB(38, 38, 48)
     MM2TabBtn.TextColor3 = Color3.fromRGB(0, 215, 255)
     MainTabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
@@ -320,7 +365,7 @@ local menuVisible = true
 UserInputService.InputBegan:Connect(function(input, gpe)
     if not gpe and input.KeyCode == Enum.KeyCode.RightShift then
         menuVisible = not menuVisible
-        local targetSize = menuVisible and UDim2.new(0, 270, 0, 595) or UDim2.new(0, 270, 0, 0)
+        local targetSize = menuVisible and (isMinimized and minimizedSize or normalSize) or UDim2.new(0, 270, 0, 0)
         TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = targetSize}):Play()
     end
 end)
@@ -358,7 +403,7 @@ local noclipEnabled = false
 local flyEnabled = false
 local flingEnabled = false
 local flingAllEnabled = false
-local climbEnabled = false -- Переменная для паука
+local climbEnabled = false
 
 RunService.Heartbeat:Connect(function()
     if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
@@ -408,7 +453,6 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- ЛОГИКА ПОЛЗАНИЯ ПО СТЕНАМ (WALL CLIMB / SPIDER-MAN)
 ClimbBtn.MouseButton1Click:Connect(function()
     climbEnabled = not climbEnabled
     ClimbBtn.Text = climbEnabled and "ПОЛЗАТЬ ПО СТЕНАМ: ВКЛ" or "ПОЛЗАТЬ ПО СТЕНАМ: ВЫКЛ"
@@ -421,7 +465,6 @@ RunService.Heartbeat:Connect(function()
     local humanoid = lp.Character:FindFirstChildOfClass("Humanoid")
     if not root or not humanoid then return end
 
-    -- Пускаем луч вперед персонажа на 2.5 ступени, чтобы обнаружить стену
     local raycastParams = RaycastParams.new()
     raycastParams.FilterDescendantsInstances = {lp.Character}
     raycastParams.FilterType = Enum.RaycastFilterType.Exclude
@@ -430,11 +473,9 @@ RunService.Heartbeat:Connect(function()
     local raycastResult = workspace:Raycast(root.Position, rayDirection, raycastParams)
 
     if raycastResult then
-        -- Если нашли стену, удерживаем вертикальную скорость, имитируя карабканье при движении вперед
         if humanoid.MoveDirection.Magnitude > 0 then
             root.Velocity = Vector3.new(root.Velocity.X, targetSpeed * 0.8, root.Velocity.Z)
         else
-            -- Удерживаем персонажа на стене (не даем сразу упасть)
             root.Velocity = Vector3.new(root.Velocity.X, 0.1, root.Velocity.Z)
         end
     end
