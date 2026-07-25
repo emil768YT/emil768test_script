@@ -42,6 +42,8 @@ local translations = {
         KillAllNeedKnife = "НУЖЕН НОЖ (MURDER)!",
         AutoSheriffOn = "АВТОТЕЛЕПОРТ И СБОР ПИСТОЛЕТА: ВКЛ",
         AutoSheriffOff = "АВТОТЕЛЕПОРТ И СБОР ПИСТОЛЕТА: ВЫКЛ",
+        AutoFarmCoinsOn = "АВТОФАРМ МОНЕТ: ВКЛ",
+        AutoFarmCoinsOff = "АВТОФАРМ МОНЕТ: ВЫКЛ",
         KeyBox = "КЛАВИША",
         BindFly = "FLY (ПОЛЕТ)",
         BindNoclip = "NOCLIP",
@@ -51,6 +53,7 @@ local translations = {
         BindEsp = "ESP MM2",
         BindKillAll = "KILL ALL",
         BindAutoSheriff = "AUTO SHERIFF",
+        BindAutoFarmCoins = "AUTO FARM COINS",
         RoleMurder = "Murder",
         RoleSheriff = "Sheriff",
         RoleInnocent = "Innocent"
@@ -87,6 +90,8 @@ local translations = {
         KillAllNeedKnife = "NEED KNIFE (MURDER)!",
         AutoSheriffOn = "AUTO TP & PICKUP GUN: ON",
         AutoSheriffOff = "AUTO TP & PICKUP GUN: OFF",
+        AutoFarmCoinsOn = "AUTO FARM COINS: ON",
+        AutoFarmCoinsOff = "AUTO FARM COINS: OFF",
         KeyBox = "KEY",
         BindFly = "FLY",
         BindNoclip = "NOCLIP",
@@ -96,6 +101,7 @@ local translations = {
         BindEsp = "ESP MM2",
         BindKillAll = "KILL ALL",
         BindAutoSheriff = "AUTO SHERIFF",
+        BindAutoFarmCoins = "AUTO FARM COINS",
         RoleMurder = "Murder",
         RoleSheriff = "Sheriff",
         RoleInnocent = "Innocent"
@@ -111,7 +117,7 @@ ScreenGui.Name = "Emil768_TestScriptGui"
 ScreenGui.Parent = game:GetService("CoreGui") or lp:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- ==================== ОСНОВНОЙ ИНТЕРФЕЙС (СКРЫТ ПРИ СТАРТЕ) ====================
+-- ==================== ОСНОВНОЙ ИНТЕРФЕЙС ====================
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
@@ -119,7 +125,7 @@ MainFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
 MainFrame.Position = UDim2.new(0.5, -135, 0.5, -240)
 MainFrame.Size = UDim2.new(0, 270, 0, 595)
 MainFrame.ClipsDescendants = true
-MainFrame.Visible = false -- Заднее меню полностью скрыто при запуске
+MainFrame.Visible = false
 
 local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 12)
@@ -243,7 +249,7 @@ BindsTitle.TextColor3 = Color3.fromRGB(0, 215, 255)
 BindsTitle.TextSize = 12
 BindsTitle.TextXAlignment = Enum.TextXAlignment.Center
 
--- ==================== LIQUID GLASS WELCOME MENU ====================
+-- ==================== WELCOME MENU ====================
 local GlassOverlay = Instance.new("Frame")
 GlassOverlay.Name = "GlassOverlay"
 GlassOverlay.Parent = ScreenGui
@@ -256,7 +262,7 @@ GlassCard.Name = "GlassCard"
 GlassCard.Parent = GlassOverlay
 GlassCard.AnchorPoint = Vector2.new(0.5, 0.5)
 GlassCard.Position = UDim2.new(0.5, 0, 0.5, 0)
-GlassCard.Size = UDim2.new(0, 0, 0, 0) -- Плавное расширение при запуске
+GlassCard.Size = UDim2.new(0, 0, 0, 0)
 GlassCard.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
 GlassCard.BackgroundTransparency = 1
 
@@ -344,7 +350,6 @@ EnStroke.Thickness = 1
 EnStroke.Transparency = 1
 EnStroke.Parent = EnBtn
 
--- АНИМАЦИЯ ПОЯВЛЕНИЯ ПРИВЕТСТВИЯ ПРИ СТАРТЕ
 local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 TweenService:Create(GlassCard, tweenInfo, {Size = UDim2.new(0, 250, 0, 250), BackgroundTransparency = 0.1}):Play()
 TweenService:Create(GlassStroke, tweenInfo, {Transparency = 0.2}):Play()
@@ -532,20 +537,21 @@ local function createBindSettingRow(parent, labelKey)
 end
 
 local function GetPlayer(name)
+    if not name or name == "" then return nil end
     name = name:lower()
     for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= lp and (p.Name:lower():sub(1, #name) == name or p.DisplayName:lower():sub(1, #name) == name) then
-            return p
+        if p ~= lp then
+            if p.Name:lower():find(name, 1, true) or p.DisplayName:lower():find(name, 1, true) then
+                return p
+            end
         end
     end
     return nil
 end
 
--- КНОПКА СМЕНЫ ЯЗЫКА В НАСТРОЙКАХ
 local LangToggleBtn = createButton(t("LangBtn"), true)
 LangToggleBtn.Parent = BindsContainer
 
--- СЕКЦИЯ СКОРОСТИ
 local SpeedGroup = createVisualGroup(MainContainer, 110)
 local SpeedBox = createTextBox(t("SpeedBox"))
 local SetSpeedBtn = createButton(t("SetSpeed"), true)
@@ -554,7 +560,6 @@ SpeedBox.Parent = SpeedGroup
 SetSpeedBtn.Parent = SpeedGroup
 ResetSpeedBtn.Parent = SpeedGroup
 
--- КНОПКИ ДВИЖЕНИЯ
 local InfJumpBtn = createButton(t("InfJumpOff"), false)
 local NoclipBtn = createButton(t("NoclipOff"), false)
 local FlyBtn = createButton(t("FlyOff"), false)
@@ -564,14 +569,12 @@ NoclipBtn.Parent = MainContainer
 FlyBtn.Parent = MainContainer
 ClimbBtn.Parent = MainContainer
 
--- СЕКЦИЯ ТЕЛЕПОРТА
 local TpGroup = createVisualGroup(MainContainer, 75)
 local TpTargetBox = createTextBox(t("TpBox"))
 local TpBtn = createButton(t("TpBtn"), true)
 TpTargetBox.Parent = TpGroup
 TpBtn.Parent = TpGroup
 
--- СЕКЦИЯ ФЛИНГА
 local FlingGroup = createVisualGroup(MainContainer, 75)
 local FlingTargetBox = createTextBox(t("FlingBox"))
 local FlingBtn = createButton(t("FlingBtnOff"), false)
@@ -591,6 +594,9 @@ KillAllBtn.Parent = KillBindGroup
 local AutoSheriffTpBtn = createButton(t("AutoSheriffOff"), false)
 AutoSheriffTpBtn.Parent = MM2Container
 
+local AutoFarmCoinsBtn = createButton(t("AutoFarmCoinsOff"), false)
+AutoFarmCoinsBtn.Parent = MM2Container
+
 local FlyBindBox = createBindSettingRow(BindsContainer, "BindFly")
 local NoclipBindBox = createBindSettingRow(BindsContainer, "BindNoclip")
 local InfJumpBindBox = createBindSettingRow(BindsContainer, "BindInfJump")
@@ -599,6 +605,7 @@ local FlingAllBindBox = createBindSettingRow(BindsContainer, "BindFlingAll")
 local EspBindBox = createBindSettingRow(BindsContainer, "BindEsp")
 local KillAllBindBox = createBindSettingRow(BindsContainer, "BindKillAll")
 local AutoSheriffBindBox = createBindSettingRow(BindsContainer, "BindAutoSheriff")
+local AutoFarmCoinsBindBox = createBindSettingRow(BindsContainer, "BindAutoFarmCoins")
 
 local keyBinds = {
     Fly = nil,
@@ -608,7 +615,8 @@ local keyBinds = {
     FlingAll = nil,
     Esp = nil,
     KillAll = nil,
-    AutoSheriff = nil
+    AutoSheriff = nil,
+    AutoFarmCoins = nil
 }
 
 local function setupKeyBindLogic(box, keyName)
@@ -641,6 +649,7 @@ setupKeyBindLogic(FlingAllBindBox, "FlingAll")
 setupKeyBindLogic(EspBindBox, "Esp")
 setupKeyBindLogic(KillAllBindBox, "KillAll")
 setupKeyBindLogic(AutoSheriffBindBox, "AutoSheriff")
+setupKeyBindLogic(AutoFarmCoinsBindBox, "AutoFarmCoins")
 
 local infJumpEnabled = false
 local noclipEnabled = false
@@ -650,6 +659,7 @@ local flingAllEnabled = false
 local climbEnabled = false
 local mm2EspEnabled = false
 local autoSheriffTpEnabled = false
+local autoFarmCoinsEnabled = false
 
 local function updateUiTexts()
     BindsTitle.Text = t("BindsTabTitle")
@@ -674,13 +684,13 @@ local function updateUiTexts()
     MM2EspBtn.Text = mm2EspEnabled and t("EspOn") or t("EspOff")
     KillAllBtn.Text = t("KillAllBtn")
     AutoSheriffTpBtn.Text = autoSheriffTpEnabled and t("AutoSheriffOn") or t("AutoSheriffOff")
+    AutoFarmCoinsBtn.Text = autoFarmCoinsEnabled and t("AutoFarmCoinsOn") or t("AutoFarmCoinsOff")
     
     for key, label in pairs(bindLabels) do
         label.Text = t(key)
     end
 end
 
--- ВЫБОР ЯЗЫКА: ПЛАВНОЕ ИСЧЕЗНОВЕНИЕ ОКНА ВЫБОРА И ПОЯВЛЕНИЕ ЧИТ-МЕНЮ
 local function selectLanguage(lang)
     currentLang = lang
     updateUiTexts()
@@ -695,7 +705,6 @@ local function selectLanguage(lang)
     task.wait(0.3)
     GlassOverlay:Destroy()
     
-    -- Плавное появление основного меню
     MainFrame.Visible = true
     MainFrame.Size = UDim2.new(0, 270, 0, 0)
     TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = normalSize}):Play()
@@ -880,10 +889,12 @@ UserInputService.JumpRequest:Connect(function()
 end)
 
 RunService.Stepped:Connect(function()
-    if noclipEnabled or flingEnabled or flingAllEnabled then
+    if noclipEnabled or autoFarmCoinsEnabled then
         if lp.Character then
             for _, part in ipairs(lp.Character:GetDescendants()) do
-                if part:IsA("BasePart") then part.CanCollide = false end
+                if part:IsA("BasePart") then 
+                    part.CanCollide = false 
+                end
             end
         end
     end
@@ -917,115 +928,125 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
-local flingConnection, savedCFrame
-local function disableFlingAndReturn()
-    flingEnabled = false 
-    FlingBtn.Text = t("FlingBtnOff") 
-    TweenService:Create(FlingBtn, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-    
-    if flingConnection then flingConnection:Disconnect() end
-    if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then 
-        lp.Character.HumanoidRootPart.RotVelocity = Vector3.new(0, 0, 0)
-        lp.Character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
-        if savedCFrame then 
-            lp.Character.HumanoidRootPart.CFrame = savedCFrame 
-            savedCFrame = nil 
-        end 
+-- ========== УНИВЕРСАЛЬНЫЙ ФЛИНГ (РАБОТАЕТ И В ЛОББИ, И В ИГРЕ) ==========
+local flingConnection = nil
+local savedCFrame = nil
+local flingTarget = nil
+
+local function stopFling()
+    flingEnabled = false
+    if flingConnection then
+        flingConnection:Disconnect()
+        flingConnection = nil
     end
+    if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+        local root = lp.Character.HumanoidRootPart
+        root.RotVelocity = Vector3.new(0, 0, 0)
+        root.Velocity = Vector3.new(0, 0, 0)
+        if savedCFrame then
+            root.CFrame = savedCFrame
+            savedCFrame = nil
+        end
+    end
+    FlingBtn.Text = t("FlingBtnOff")
+    FlingBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 end
 
 local function toggleFling()
-    if flingAllEnabled then return end
+    if flingAllEnabled then
+        print("FLING ALL активен, отключите его сначала")
+        return
+    end
+
     if not flingEnabled then
         local target = GetPlayer(FlingTargetBox.Text)
-        if FlingTargetBox.Text == "" or not target then 
-            FlingBtn.Text = t("PlayerNotFound") 
-            FlingBtn.TextColor3 = Color3.fromRGB(255, 50, 50) 
-            task.wait(1) 
-            FlingBtn.Text = t("FlingBtnOff") 
-            FlingBtn.TextColor3 = Color3.fromRGB(255, 255, 255) 
-            return 
+        if FlingTargetBox.Text == "" or not target then
+            FlingBtn.Text = t("PlayerNotFound")
+            FlingBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
+            task.wait(1)
+            FlingBtn.Text = t("FlingBtnOff")
+            FlingBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            return
         end
-        
-        if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then 
-            savedCFrame = lp.Character.HumanoidRootPart.CFrame 
-        end
-        
-        flingEnabled = true 
-        FlingBtn.Text = t("FlingBtnAttack") .. target.Name:upper() 
-        TweenService:Create(FlingBtn, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255, 50, 50)}):Play()
-        
-        flingConnection = RunService.Heartbeat:Connect(function()
-            if not flingEnabled or not lp.Character or not target.Character then return end
-            local myRoot = lp.Character:FindFirstChild("HumanoidRootPart") 
-            local tRoot = target.Character:FindFirstChild("HumanoidRootPart")
-            
-            if myRoot and tRoot then 
-                if tRoot.Position.Y < -20 then
-                    disableFlingAndReturn()
-                    return
-                end
 
-                myRoot.RotVelocity = Vector3.new(0, 999999, 0)
-                myRoot.Velocity = Vector3.new(0, 0, 0)
-                
-                local targetVelocity = tRoot.Velocity
-                local predictedPosition = tRoot.Position + (targetVelocity * 0.12)
-                
-                myRoot.CFrame = CFrame.new(predictedPosition) * CFrame.new(0, 0.1, 0)
+        if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+            savedCFrame = lp.Character.HumanoidRootPart.CFrame
+        end
+
+        flingEnabled = true
+        flingTarget = target
+        FlingBtn.Text = t("FlingBtnAttack") .. target.Name:upper()
+        FlingBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
+
+        flingConnection = RunService.Heartbeat:Connect(function()
+            if not flingEnabled or not lp.Character or not flingTarget or not flingTarget.Character then
+                stopFling()
+                return
             end
+            
+            local myRoot = lp.Character:FindFirstChild("HumanoidRootPart")
+            local tRoot = flingTarget.Character:FindFirstChild("HumanoidRootPart")
+            
+            if not myRoot or not tRoot then 
+                stopFling()
+                return 
+            end
+
+            -- Выбивание угловой скорости без привязки к состоянию раунда
+            myRoot.RotVelocity = Vector3.new(0, 999999, 0)
+            myRoot.Velocity = Vector3.new(0, 0, 0)
+
+            local predictedPosition = tRoot.Position + (tRoot.Velocity * 0.1)
+            myRoot.CFrame = CFrame.new(predictedPosition)
         end)
     else
-        disableFlingAndReturn()
+        stopFling()
     end
 end
 
-FlingBtn.MouseButton1Click:Connect(toggleFling)
-
 local function toggleFlingAll()
-    if flingEnabled or flingAllEnabled then return end
+    if flingEnabled then
+        print("Сначала отключите обычный флинг")
+        return
+    end
+    if flingAllEnabled then
+        flingAllEnabled = false
+        FlingAllBtn.Text = t("FlingAllBtn")
+        FlingAllBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        return
+    end
+
     if not lp.Character or not lp.Character:FindFirstChild("HumanoidRootPart") then return end
-    
+
     local myRoot = lp.Character.HumanoidRootPart
     local oldCFrame = myRoot.CFrame
     flingAllEnabled = true
-    
     FlingAllBtn.Text = t("FlingAllActive")
     FlingAllBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
-    
+
     local targets = {}
     for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= lp and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChildOfClass("Humanoid") then
-            if p.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
-                table.insert(targets, p)
-            end
+        if p ~= lp and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            table.insert(targets, p)
         end
     end
-    
+
     task.spawn(function()
         for _, target in ipairs(targets) do
-            if not flingAllEnabled or not lp.Character or not target.Character then continue end
-            local tRoot = target.Character:FindFirstChild("HumanoidRootPart")
-            local tHum = target.Character:FindFirstChildOfClass("Humanoid")
-            
-            if tRoot and tHum and tHum.Health > 0 then
+            if not flingAllEnabled or not lp.Character then break end
+            local tRoot = target.Character and target.Character:FindFirstChild("HumanoidRootPart")
+            if tRoot then
                 local startTime = tick()
-                while tick() - startTime < 0.5 and flingAllEnabled and myRoot and tRoot and tHum.Health > 0 do
-                    if tRoot.Position.Y < -20 then
-                        break
-                    end
-
+                while flingAllEnabled and lp.Character and target.Character and tick() - startTime < 0.5 do
                     myRoot.RotVelocity = Vector3.new(0, 999999, 0)
                     myRoot.Velocity = Vector3.new(0, 0, 0)
-                    
                     local predPos = tRoot.Position + (tRoot.Velocity * 0.12)
                     myRoot.CFrame = CFrame.new(predPos)
-                    
                     RunService.Heartbeat:Wait()
                 end
             end
         end
-        
+
         flingAllEnabled = false
         if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
             myRoot.RotVelocity = Vector3.new(0, 0, 0)
@@ -1037,8 +1058,10 @@ local function toggleFlingAll()
     end)
 end
 
+FlingBtn.MouseButton1Click:Connect(toggleFling)
 FlingAllBtn.MouseButton1Click:Connect(toggleFlingAll)
 
+-- ========== ESP, ШЕРИФ, УБИЙСТВО ВСЕХ ==========
 local currentSheriff = nil
 
 local function removeTagFromChar(char)
@@ -1272,8 +1295,112 @@ local function toggleAutoSheriff()
     TweenService:Create(AutoSheriffTpBtn, TweenInfo.new(0.2), {TextColor3 = autoSheriffTpEnabled and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)}):Play()
 end
 
+-- ===== АВТОФАРМ МОНЕТ ПОД КАРТОЙ (СБОР ГОЛОВОЙ) =====
+local autoFarmCoinsLoopConnection = nil
+local autoFarmCoinsSearchConnection = nil
+local closestCoin = nil
+
+local function findCoins()
+    local coins = {}
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") and obj.Name:lower():find("coin") then
+            local parent = obj.Parent
+            local isPlayerPart = false
+            while parent do
+                if parent:IsA("Model") and parent:FindFirstChildOfClass("Humanoid") then
+                    isPlayerPart = true
+                    break
+                end
+                parent = parent.Parent
+            end
+            if not isPlayerPart then
+                table.insert(coins, obj)
+            end
+        end
+    end
+    return coins
+end
+
+local function updateClosestCoin()
+    if not autoFarmCoinsEnabled then return end
+    if not lp.Character or not lp.Character:FindFirstChild("HumanoidRootPart") then return end
+    
+    if flingEnabled or flingAllEnabled then
+        closestCoin = nil
+        return
+    end
+
+    local myPos = lp.Character.HumanoidRootPart.Position
+    local coins = findCoins()
+    if #coins > 0 then
+        local closest = nil
+        local closestDist = math.huge
+        for _, coin in ipairs(coins) do
+            local dist = (coin.Position - myPos).Magnitude
+            if dist < closestDist then
+                closestDist = dist
+                closest = coin
+            end
+        end
+        closestCoin = closest
+    else
+        closestCoin = nil
+    end
+end
+
+local function toggleAutoFarmCoins()
+    autoFarmCoinsEnabled = not autoFarmCoinsEnabled
+    AutoFarmCoinsBtn.Text = autoFarmCoinsEnabled and t("AutoFarmCoinsOn") or t("AutoFarmCoinsOff")
+    TweenService:Create(AutoFarmCoinsBtn, TweenInfo.new(0.2), {TextColor3 = autoFarmCoinsEnabled and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(255, 255, 255)}):Play()
+
+    if autoFarmCoinsEnabled then
+        if autoFarmCoinsLoopConnection then autoFarmCoinsLoopConnection:Disconnect() end
+        if autoFarmCoinsSearchConnection then autoFarmCoinsSearchConnection:Disconnect() end
+
+        autoFarmCoinsSearchConnection = RunService.Heartbeat:Connect(updateClosestCoin)
+
+        autoFarmCoinsLoopConnection = RunService.Heartbeat:Connect(function()
+            if not autoFarmCoinsEnabled then
+                if autoFarmCoinsLoopConnection then autoFarmCoinsLoopConnection:Disconnect() end
+                if autoFarmCoinsSearchConnection then autoFarmCoinsSearchConnection:Disconnect() end
+                autoFarmCoinsLoopConnection = nil
+                autoFarmCoinsSearchConnection = nil
+                return
+            end
+            if not lp.Character or not lp.Character:FindFirstChild("HumanoidRootPart") then return end
+            
+            if flingEnabled or flingAllEnabled then
+                return
+            end
+            if not closestCoin or not closestCoin.Parent then
+                updateClosestCoin()
+                return
+            end
+
+            local myRoot = lp.Character.HumanoidRootPart
+            local head = lp.Character:FindFirstChild("Head") or myRoot
+            
+            local underMapPosition = closestCoin.Position - Vector3.new(0, 3.2, 0)
+            
+            myRoot.CFrame = CFrame.new(underMapPosition)
+            myRoot.Velocity = Vector3.new(0, 0, 0)
+            myRoot.RotVelocity = Vector3.new(0, 0, 0)
+            
+            if firetouchinterest then
+                firetouchinterest(head, closestCoin, 0)
+                firetouchinterest(head, closestCoin, 1)
+            end
+        end)
+    else
+        if autoFarmCoinsLoopConnection then autoFarmCoinsLoopConnection:Disconnect() autoFarmCoinsLoopConnection = nil end
+        if autoFarmCoinsSearchConnection then autoFarmCoinsSearchConnection:Disconnect() autoFarmCoinsSearchConnection = nil end
+        closestCoin = nil
+    end
+end
+
 MM2EspBtn.MouseButton1Click:Connect(toggleEsp)
 AutoSheriffTpBtn.MouseButton1Click:Connect(toggleAutoSheriff)
+AutoFarmCoinsBtn.MouseButton1Click:Connect(toggleAutoFarmCoins)
 
 UserInputService.InputBegan:Connect(function(input, gpe)
     if gpe then return end
@@ -1286,12 +1413,13 @@ UserInputService.InputBegan:Connect(function(input, gpe)
     if k == keyBinds.Esp then toggleEsp() end
     if k == keyBinds.KillAll then killEveryone() end
     if k == keyBinds.AutoSheriff then toggleAutoSheriff() end
+    if k == keyBinds.AutoFarmCoins then toggleAutoFarmCoins() end
 end)
 
 lp.CharacterAdded:Connect(function()
     task.wait(0.5)
     if flyEnabled then stopFlying() flyEnabled = true startFlying() end
-    if flingEnabled then flingEnabled = false FlingBtn.Text = t("FlingBtnOff") FlingBtn.TextColor3 = Color3.fromRGB(255, 255, 255) if flingConnection then flingConnection:Disconnect() end end
+    if flingEnabled then stopFling() end
     flingAllEnabled = false
     climbEnabled = false
 end)
